@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portable Etsy Manager - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #2a2a2a;
+            padding: 20px;
+            border-bottom: 1px solid #3a3a3a;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+        }
+        
+        .stat-content h3 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-content p {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .orders-list {
+            background: #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .orders-header {
+            background: #333;
+            padding: 20px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        
+        .orders-header h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .order-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto auto;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #333;
+            align-items: center;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .order-image {
+            width: 60px;
+            height: 60px;
+            background: #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .order-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .order-info p {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .order-status {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .order-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #10b981;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #f59e0b; color: white; }
+        .status-cut { background: #8b5cf6; color: white; }
+        .status-ready { background: #10b981; color: white; }
+        .status-shipped { background: #3b82f6; color: white; }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #a0a0a0;
+        }
+        
+        .error {
+            background: #dc2626;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 Portable Etsy Order Manager</h1>
+        <p>Modern Sipariş Yönetim Sistemi</p>
+    </div>
+    
+    <div class="container">
+        <div id="status-message"></div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h3 id="total-orders">-</h3>
+                    <p>Toplam Sipariş</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✂️</div>
+                <div class="stat-content">
+                    <h3 id="cut-orders">-</h3>
+                    <p>Kesim Yapıldı</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3 id="ready-orders">-</h3>
+                    <p>Hazır</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚚</div>
+                <div class="stat-content">
+                    <h3 id="shipped-orders">-</h3>
+                    <p>Gönderildi</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="orders-list">
+            <div class="orders-header">
+                <h2>Son Siparişler</h2>
+                <p>En son gelen siparişlerin listesi</p>
+            </div>
+            <div id="orders-container">
+                <div class="loading">📊 Veriler yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Demo için statik verileri yükle
+        let orders = [];
+        
+        async function loadData() {
+            const statusEl = document.getElementById('status-message');
+            
+            try {
+                // Önce backend API'yi dene
+                const response = await fetch('/api/orders');
+                if (response.ok) {
+                    orders = await response.json();
+                    statusEl.innerHTML = '<div class="success">✅ Veriler backend API\'den yüklendi</div>';
+                } else {
+                    throw new Error('API yanıt vermedi');
+                }
+            } catch (error) {
+                // API yoksa yerel JSON dosyasını dene
+                try {
+                    const response = await fetch('./data/etsy_orders.json');
+                    if (response.ok) {
+                        orders = await response.json();
+                        statusEl.innerHTML = '<div class="success">✅ Veriler yerel dosyadan yüklendi</div>';
+                    } else {
+                        throw new Error('Yerel dosya bulunamadı');
+                    }
+                } catch (error2) {
+                    // Demo verileri kullan
+                    orders = generateDemoData();
+                    statusEl.innerHTML = '<div class="error">⚠️ Backend API bulunamadı - Demo verileri gösteriliyor</div>';
+                }
+            }
+            
+            updateStats();
+            displayOrders();
+        }
+        
+        function generateDemoData() {
+            return [
+                {
+                    transaction_id: 'DEMO-001',
+                    product: {
+                        name: '14K Gold Pendant Demo',
+                        material_size: '14K Gold 20mm',
+                        quantity: 1
+                    },
+                    customer: {
+                        name: 'Demo Customer',
+                        address: 'Demo Address, Demo City'
+                    },
+                    pricing: {
+                        order_total: 125.99
+                    },
+                    fulfillment: {
+                        cut: true,
+                        ready: false,
+                        shipped: false
+                    },
+                    order_date: new Date().toISOString()
+                },
+                {
+                    transaction_id: 'DEMO-002',
+                    product: {
+                        name: 'Sterling Silver Necklace Demo',
+                        material_size: 'Silver 18mm',
+                        quantity: 1
+                    },
+                    customer: {
+                        name: 'Demo Customer 2',
+                        address: 'Demo Address 2, Demo City'
+                    },
+                    pricing: {
+                        order_total: 89.99
+                    },
+                    fulfillment: {
+                        cut: false,
+                        ready: false,
+                        shipped: false
+                    },
+                    order_date: new Date().toISOString()
+                }
+            ];
+        }
+        
+        function updateStats() {
+            const total = orders.length;
+            const cut = orders.filter(o => o.fulfillment?.cut).length;
+            const ready = orders.filter(o => o.fulfillment?.ready).length;
+            const shipped = orders.filter(o => o.fulfillment?.shipped).length;
+            
+            document.getElementById('total-orders').textContent = total;
+            document.getElementById('cut-orders').textContent = cut;
+            document.getElementById('ready-orders').textContent = ready;
+            document.getElementById('shipped-orders').textContent = shipped;
+        }
+        
+        function displayOrders() {
+            const container = document.getElementById('orders-container');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="loading">Sipariş bulunamadı</div>';
+                return;
+            }
+            
+            const ordersHtml = orders.slice(0, 10).map(order => {
+                const status = getOrderStatus(order.fulfillment);
+                return `
+                    <div class="order-item">
+                        <div class="order-image">📦</div>
+                        <div class="order-info">
+                            <h4>${order.product?.name || 'Ürün Adı'}</h4>
+                            <p>${order.customer?.name || 'Müşteri'} • ${order.product?.material_size || 'Materyal'}</p>
+                            <p>ID: ${order.transaction_id}</p>
+                        </div>
+                        <div class="status-badge status-${status.toLowerCase()}">${status}</div>
+                        <div class="order-price">$${order.pricing?.order_total?.toFixed(2) || '0.00'}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = ordersHtml;
+        }
+        
+        function getOrderStatus(fulfillment) {
+            if (!fulfillment) return 'Pending';
+            if (fulfillment.shipped) return 'Shipped';
+            if (fulfillment.ready) return 'Ready';
+            if (fulfillment.cut) return 'Cut';
+            return 'Pending';
+        }
+        
+        // Sayfa yüklendiğinde verileri yükle
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

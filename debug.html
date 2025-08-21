@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etsy Manager - Full Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.success { background: #28a745; }
+        button.danger { background: #dc3545; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .orders-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .orders-table th, .orders-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .orders-table th { background: #f2f2f2; }
+        .orders-table tr { height: 85px; }
+        .orders-table td { vertical-align: middle; }
+        .product-image { width: 75px; height: 75px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd; }
+        .no-image { width: 75px; height: 75px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; border: 1px solid #ddd; }
+        .status-buttons { display: flex; gap: 5px; }
+        .status-buttons button { padding: 5px 10px; font-size: 12px; }
+        .checkbox-container { display: flex; gap: 10px; align-items: center; }
+        .checkbox-container input { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Etsy Manager - Full Debug & Test</h1>
+        
+        <div id="status" class="status info">
+            Debug sayfası yüklendi. Backend API'sini test edin.
+        </div>
+        
+        <div>
+            <button onclick="testAPI()">🧪 API Test Et</button>
+            <button onclick="loadOrdersWithImages()">📊 Orders + Images Yükle</button>
+            <button onclick="testBackendSave()">💾 Backend Save Test</button>
+            <button onclick="testImageUrls()">🖼️ Image URL Test</button>
+            <button onclick="clearLogs()">🗑️ Logları Temizle</button>
+        </div>
+        
+        <div id="logs">
+            <h3>📋 Test Logları</h3>
+            <pre id="logContent">Test başlatılmadı...</pre>
+        </div>
+        
+        <div id="ordersSection" style="display: none;">
+            <h3>📊 Orders Tablosu (Interactive Test)</h3>
+            <div id="ordersCount"></div>
+            <table class="orders-table" id="ordersTable">
+                <thead>
+                    <tr>
+                        <th style="width: 85px;">Image</th>
+                        <th>Transaction ID</th>
+                        <th style="width: 120px;">Status</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th style="width: 150px;">Tasks</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let ordersData = [];
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logContent = document.getElementById('logContent');
+            logContent.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        function setStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logContent').textContent = 'Loglar temizlendi...\n';
+        }
+        
+        async function testAPI() {
+            setStatus('API test başlatılıyor...', 'info');
+            log('🧪 API Test başlatılıyor...');
+            
+            try {
+                // Health check
+                log('1️⃣ Health endpoint test ediliyor...');
+                const healthResponse = await fetch('/health');
+                const healthData = await healthResponse.json();
+                log(`✅ Health OK: ${JSON.stringify(healthData)}`);
+                
+                // Orders endpoint
+                log('2️⃣ Orders endpoint test ediliyor...');
+                const ordersResponse = await fetch('/api/orders');
+                log(`Status: ${ordersResponse.status}`);
+                
+                if (ordersResponse.ok) {
+                    const ordersData = await ordersResponse.json();
+                    log(`✅ Orders OK: ${ordersData.length} order bulundu`);
+                    setStatus(`API test başarılı! ${ordersData.length} order bulundu.`, 'success');
+                } else {
+                    const errorText = await ordersResponse.text();
+                    log(`❌ Orders Error: ${errorText}`);
+                    setStatus('API test başarısız!', 'error');
+                }
+            } catch (error) {
+                log(`❌ API Test Error: ${error.message}`);
+                setStatus('API bağlantı hatası!', 'error');
+            }
+        }
+        
+        async function loadOrdersWithImages() {
+            setStatus('Orders ve images yükleniyor...', 'info');
+            log('📊 Orders ve images yükleniyor...');
+            
+            try {
+                const response = await fetch('/api/orders');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                
+                ordersData = await response.json();
+                log(`✅ ${ordersData.length} order yüklendi`);
+                
+                // Image istatistikleri
+                let validImages = 0;
+                let fixedImages = 0;
+                let noImages = 0;
+                
+                ordersData.forEach((order, index) => {
+                    const imageUrl = order.image_url || '';
+                    if (imageUrl.includes('il_75x75')) {
+                        fixedImages++;
+                    } else if (imageUrl.includes('i.etsystatic.com')) {
+                        validImages++;
+                    } else {
+                        noImages++;
+                    }
+                });
+                
+                log(`📸 Image durumu:`);
+                log(`   - 75x75 fixed images: ${fixedImages}`);
+                log(`   - Diğer Etsy images: ${validImages}`);
+                log(`   - No images: ${noImages}`);
+                
+                // Show orders section
+                document.getElementById('ordersSection').style.display = 'block';
+                document.getElementById('ordersCount').textContent = `Toplam ${ordersData.length} order - ${fixedImages} adet 75x75 image`;
+                
+                // Populate table
+                renderOrdersTable();
+                
+                setStatus(`${ordersData.length} order yüklendi! ${fixedImages} adet 75x75 image var.`, 'success');
+                
+            } catch (error) {
+                log(`❌ Orders yükleme hatası: ${error.message}`);
+                setStatus('Orders yüklenemedi!', 'error');
+            }
+        }
+        
+        function renderOrdersTable() {
+            const tbody = document.getElementById('ordersBody');
+            tbody.innerHTML = '';
+            
+            ordersData.forEach(order => {
+                const row = tbody.insertRow();
+                
+                // Image URL kontrolü
+                const imageUrl = order.image_url || '';
+                const hasValidImage = imageUrl && imageUrl.includes('i.etsystatic.com');
+                const is75x75 = imageUrl.includes('il_75x75');
+                
+                row.innerHTML = `
+                    <td style="text-align: center; padding: 5px;">
+                        ${hasValidImage ? 
+                            `<img src="${imageUrl}" alt="Product" class="product-image" onclick="window.open('${imageUrl}', '_blank')" title="Resmi büyütmek için tıklayın (${is75x75 ? '75x75 ✅' : 'Other size ⚠️'})">` :
+                            `<div class="no-image">No Image</div>`
+                        }
+                    </td>
+                    <td>${order.transaction_id}</td>
+                    <td>
+                        <div class="status-buttons">
+                            <button class="${order.status === 'pending' ? 'secondary' : ''}" onclick="updateStatus(${order.transaction_id}, 'pending')">Pending</button>
+                            <button class="${order.status === 'cut' ? 'success' : ''}" onclick="updateStatus(${order.transaction_id}, 'cut')">Cut</button>
+                            <button class="${order.status === 'ready' ? 'success' : ''}" onclick="updateStatus(${order.transaction_id}, 'ready')">Ready</button>
+                            <button class="${order.status === 'shipped' ? 'success' : ''}" onclick="updateStatus(${order.transaction_id}, 'shipped')">Shipped</button>
+                        </div>
+                    </td>
+                    <td>${order.customer?.name || 'N/A'}</td>
+                    <td title="${order.product?.name}">${(order.product?.name || '').substring(0, 40)}...</td>
+                    <td>
+                        <div class="checkbox-container">
+                            <label><input type="checkbox" ${order.fulfillment?.cut ? 'checked' : ''} onchange="updateFulfillment(${order.transaction_id}, 'cut', this.checked)"> Cut</label>
+                            <label><input type="checkbox" ${order.fulfillment?.ready ? 'checked' : ''} onchange="updateFulfillment(${order.transaction_id}, 'ready', this.checked)"> Ready</label>
+                            <label><input type="checkbox" ${order.fulfillment?.shipped ? 'checked' : ''} onchange="updateFulfillment(${order.transaction_id}, 'shipped', this.checked)"> Shipped</label>
+                        </div>
+                    </td>
+                    <td>$${order.pricing?.order_total || 0}</td>
+                    <td>${new Date(order.order_date).toLocaleDateString()}</td>
+                `;
+            });
+        }
+        
+        async function updateStatus(transactionId, newStatus) {
+            log(`🔄 Status güncelleniyor: Order ${transactionId} -> ${newStatus}`);
+            
+            try {
+                const response = await fetch(`/api/orders/${transactionId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Status updated: ${JSON.stringify(result)}`);
+                    
+                    // Local data güncelle
+                    const order = ordersData.find(o => o.transaction_id === transactionId);
+                    if (order) {
+                        order.status = newStatus;
+                        renderOrdersTable();
+                    }
+                    
+                    setStatus(`Order ${transactionId} status updated to ${newStatus}`, 'success');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Status update failed: ${error}`);
+                    setStatus('Status update failed!', 'error');
+                }
+            } catch (error) {
+                log(`❌ Status update error: ${error.message}`);
+                setStatus('Status update error!', 'error');
+            }
+        }
+        
+        async function updateFulfillment(transactionId, field, value) {
+            log(`📦 Fulfillment güncelleniyor: Order ${transactionId} ${field} -> ${value}`);
+            
+            try {
+                const response = await fetch(`/api/orders/${transactionId}/fulfillment`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ [field]: value })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Fulfillment updated: ${JSON.stringify(result)}`);
+                    
+                    // Local data güncelle
+                    const order = ordersData.find(o => o.transaction_id === transactionId);
+                    if (order) {
+                        if (!order.fulfillment) order.fulfillment = {};
+                        order.fulfillment[field] = value;
+                    }
+                    
+                    setStatus(`Order ${transactionId} ${field} updated`, 'success');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Fulfillment update failed: ${error}`);
+                    setStatus('Fulfillment update failed!', 'error');
+                }
+            } catch (error) {
+                log(`❌ Fulfillment update error: ${error.message}`);
+                setStatus('Fulfillment update error!', 'error');
+            }
+        }
+        
+        async function testBackendSave() {
+            log('💾 Backend save testi başlatılıyor...');
+            
+            if (ordersData.length === 0) {
+                log('❌ Önce orders yükleyin');
+                setStatus('Önce orders yükleyin!', 'warning');
+                return;
+            }
+            
+            const testOrder = ordersData[0];
+            log(`Test order: ${testOrder.transaction_id}`);
+            
+            try {
+                // Status update test
+                await updateStatus(testOrder.transaction_id, 'cut');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Fulfillment update test  
+                await updateFulfillment(testOrder.transaction_id, 'cut', true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                log('✅ Backend save test tamamlandı');
+                setStatus('Backend save test başarılı!', 'success');
+                
+            } catch (error) {
+                log(`❌ Backend save test failed: ${error.message}`);
+                setStatus('Backend save test failed!', 'error');
+            }
+        }
+        
+        async function testImageUrls() {
+            log('🖼️ Image URL testi başlatılıyor...');
+            
+            if (ordersData.length === 0) {
+                log('❌ Önce orders yükleyin');
+                setStatus('Önce orders yükleyin!', 'warning');
+                return;
+            }
+            
+            let tested = 0;
+            let working = 0;
+            let broken = 0;
+            
+            for (const order of ordersData.slice(0, 5)) { // İlk 5'ini test et
+                const imageUrl = order.image_url;
+                if (imageUrl && imageUrl.includes('i.etsystatic.com')) {
+                    tested++;
+                    try {
+                        const response = await fetch(imageUrl, { method: 'HEAD' });
+                        if (response.ok) {
+                            working++;
+                            log(`✅ Image OK: Order ${order.transaction_id}`);
+                        } else {
+                            broken++;
+                            log(`❌ Image BROKEN: Order ${order.transaction_id} (${response.status})`);
+                        }
+                    } catch (error) {
+                        broken++;
+                        log(`❌ Image ERROR: Order ${order.transaction_id} (${error.message})`);
+                    }
+                }
+            }
+            
+            log(`📊 Image test sonucu: ${working}/${tested} working, ${broken} broken`);
+            setStatus(`Image test: ${working}/${tested} working`, working === tested ? 'success' : 'warning');
+        }
+        
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            log('🚀 Full Debug sayfası yüklendi');
+            log('💡 Önce "Orders + Images Yükle" butonuna tıklayın');
+            log('💡 Sonra tablodaki butonları test edin');
+        };
+    </script>
+</body>
+</html>

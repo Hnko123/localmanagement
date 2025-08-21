@@ -1,0 +1,42 @@
+{
+  "app": {
+    "name": "Portable Etsy Order Manager",
+    "version": "1.0.0",
+    "description": "Taşınabilir Etsy sipariş yönetim sistemi"
+  },
+  "mode": "test",
+  "gmail": {
+    "imap_server": "imap.gmail.com",
+    "imap_port": 993,
+    "search_criteria": {
+      "from": "transaction@etsy.com",
+      "subject": "You made a sale on Etsy"
+    }
+  },
+  "processing": {
+    "mail_limit": 50,
+    "use_peek_mode": true,
+    "auto_mark_read": false
+  },
+  "data": {
+    "format": [
+      "json",
+      "csv"
+    ],
+    "backup_enabled": true,
+    "compression_enabled": false
+  },
+  "files": {
+    "credentials": "config/gmail_credentials.txt",
+    "processed_ids": "data/processed_transaction_ids.json",
+    "orders_json": "data/etsy_orders.json",
+    "orders_csv": "data/etsy_orders.csv",
+    "backup_dir": "backup",
+    "logs_dir": "logs"
+  },
+  "images": {
+    "size_conversion": "250x250",
+    "fallback_url": "",
+    "cache_enabled": false
+  }
+}
