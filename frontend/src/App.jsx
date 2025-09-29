@@ -111,9 +111,9 @@ function App() {
       setIsAuthenticated(false);
     }
 
-    const fetchOrders = async () => {
+  const fetchOrders = async () => {
       try {
-          const response = await fetch('http://127.0.0.1:8080/api/orders');
+          const response = await fetch('/api/orders');
         if (response.ok) {
           const data = await response.json();
           setOrders(data);

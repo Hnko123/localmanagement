@@ -100,11 +100,42 @@ Public URLs → Image Download → File Cache → Image Serve → User View
 
 ### Prerequisites
 
+**Docker Compose ile Kolay Setup (Önerilen):**
+- **Docker** & Docker Compose
+- Bu yöntem ile tüm bağımlılıklar otomatik kurulur!
+
+**Manuel Kurulum İçin:**
 - **Python 3.8+** with `pip`
 - **Node.js 16+** with `npm`
 - **Git** for version control
 
-### Installation
+### 🐳 Docker Compose Kurulumu (1 Dakika'da Kurulur!)
+
+#### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/etsy-order-management.git
+cd etsy-order-management
+```
+
+#### 2. Docker Compose Kurulumu
+```bash
+docker-compose up
+```
+
+Bu komut otomatik olarak:
+- ✅ PostgreSQL database ba?lar
+- ✅ Backend API'yi aya?a alacak
+- ✅ Frontend UI'yi aya?a alacak
+
+**Kurtarma: İlk çalıştırma uzun sürebilir (10-15 dak), bekleyin!**
+
+#### 3. Uygulamaya erişim
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:8000
+
+Kullanıcılar register olup girercektir!
+
+### 📝 Manuel Kurulum (Alternatif)
 
 #### 1. Clone Repository
 ```bash
