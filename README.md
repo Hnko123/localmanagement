@@ -243,14 +243,56 @@ curl -X POST http://localhost:8080/api/auth/register \
 - ✅ **Opens browser** with login credentials provided
 - ✅ **Saves** configuration locally for future use
 
-**Alternative Manual Setup:**
+**Alternative Manual Setup (Hiç GitHub/Git Kurulumuna Gerek Yok!):**
 
-If automatic setup fails:
+### 🚀 EN KOLAY YÖNTEM - Sadece Browser Yeterli!
 
-1. **Get server IP** from administrator
-2. **Open browser** to: `http://[SERVER_IP]:5178`
-3. **Request account** creation from administrator
-4. **Login** with provided credentials
+Eğer arkadaşınızın bilgisayarında GitHub/Git kurulu değilse veya hiç teknik bilgisi yoksa:
+
+#### 🚀 Süper Kolay Katılım:
+
+1️⃣ **IP Adresini Öğrenin:**
+   - Size vereceğiniz IP adresi: `192.168.0.10` (örnek)
+   - Her zaman aynı WiFi ağında olun
+
+2️⃣ **Web Browser Acın:**
+   - Google Chrome, Firefox, Safari, Edge - herhangi biri
+   - Adres çubuğuna yazın: `http://192.168.0.10:5178`
+   - Enter'a basın
+
+3️⃣ **Hesap İsteyin:**
+   - Size "Bir hesap lazım" deyin
+   - Size kullanıcı adı ve şifre vereceğim
+   - Login olun ve başlayın!
+
+#### 📱 Desteklenen Cihazlar:
+- ✅ **Akıllı Telefonlar** (iPhone/Android)
+- ✅ **Tabletler** (iPad/Samsung Tablet)
+- ✅ **Bilgisayarlar** (Windows/Mac/Linux)
+- ✅ **Notebook'lar** - sadece browser lazım!
+
+#### 💡 Tamamen Teknik Bilgi Gerekmiyor:
+- Hiç dosya indirmeye gerek yok
+- Hiç program kurmaya gerek yok
+- Sadece IP adresini alıp browser'a yazmak yeterli
+- Telefonunuzun browser'ı ile bile çalışır!
+
+---
+
+### 📋 Detaylı Adımlar (Client Setup Script Çalışmazsa):
+
+1. **Open any web browser**
+2. **Type the server URL**: `http://[SERVER_IP]:5178`
+3. **Get login credentials** from administrator
+4. **Login and enjoy!**
+
+**Example URL**: `http://192.168.0.10:5178`
+
+---
+
+### 📄 Ayrıca İnternetten Kolay Kılavuz İndirebilirsiniz:
+
+Repository'deki `CLIENT_JOIN_GUIDE.txt` dosyasını indirin - print aldırıp arkadaşlarınıza verin!
 
 **Client Permissions:**
 - 👁️ **View** all orders, tasks, and calendar
