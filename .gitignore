@@ -66,3 +66,7 @@ processed_transaction_ids.json
 
 # Cache
 .cache/
+static/image_cache/
+data/
+config/
+logs/

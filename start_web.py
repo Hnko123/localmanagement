@@ -19,17 +19,17 @@ def run_web_server():
         print("✅ Tüm modüller yüklü")
         
         print("\n🌐 Web sunucu başlatılıyor...")
-        print("📍 Adres: http://localhost:8080")
+        print("📍 Adres: http://localhost:8000")
         print("🛑 Durdurmak için Ctrl+C basın\n")
         
         # Tarayıcıyı aç
-        subprocess.Popen(['start', 'http://localhost:8080'], shell=True)
+        subprocess.Popen(['start', 'http://localhost:8000'], shell=True)
         
         # Uvicorn sunucusunu başlat
         uvicorn.run(
             "app.main:app",
             host="0.0.0.0",
-            port=8080,
+            port=8000,
             reload=True,
             log_level="info"
         )
