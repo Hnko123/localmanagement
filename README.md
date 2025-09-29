@@ -220,6 +220,44 @@ curl -X POST http://localhost:8080/api/auth/register \
 - 👥 Safe for multi-user team use
 - 🔐 JWT authentication protects data
 
+#### 🖥️ Client Setup (Team Members)
+
+**Automatic One-Click Client Setup:**
+
+1. **Download the repository** (server's admin shares the repo link)
+2. **Run the client setup script:**
+   ```powershell
+   .\setup_client.ps1
+   ```
+   Or with options:
+   ```powershell
+   .\setup_client.ps1 -AutoOpenBrowser  # Auto-open browser after setup
+   .\setup_client.ps1 -ForceIP "192.168.1.100"  # If auto-detection fails
+   ```
+
+**What the script does:**
+- ✅ **Auto-detects** server IP on your local network
+- ✅ **Tests connections** to backend and frontend
+- ✅ **Creates** a unique user account for you
+- ✅ **Configs firewall** and permissions
+- ✅ **Opens browser** with login credentials provided
+- ✅ **Saves** configuration locally for future use
+
+**Alternative Manual Setup:**
+
+If automatic setup fails:
+
+1. **Get server IP** from administrator
+2. **Open browser** to: `http://[SERVER_IP]:5178`
+3. **Request account** creation from administrator
+4. **Login** with provided credentials
+
+**Client Permissions:**
+- 👁️ **View** all orders, tasks, and calendar
+- ✏️ **Edit** order status and important notes
+- 📝 **Create/Update** tasks and events
+- ❌ **Cannot** access admin features (Google sync, user management)
+
 ## 📡 API Documentation
 
 ### Core Endpoints

@@ -32,7 +32,7 @@ const PageHeader = styled.div`
 const ChatArea = styled.div`
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background: #1a1a1a;
 `;
 
@@ -84,6 +84,94 @@ const ChatMessages = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #3a3a3a;
+`;
+
+const OnlineUsers = styled.div`
+  width: 280px;
+  background: #2a2a2a;
+  display: flex;
+  flex-direction: column;
+`;
+
+const OnlineUsersHeader = styled.div`
+  padding: 20px;
+  border-bottom: 1px solid #3a3a3a;
+  background: #2a2a2a;
+
+  h3 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .online-count {
+    color: #4CAF50;
+    font-size: 12px;
+    font-weight: 500;
+  }
+`;
+
+const UserListArea = styled.div`
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+`;
+
+const OnlineUserItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #3a3a3a;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: ${props => props.userColor};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    border: 2px solid ${props => props.userColor};
+  }
+
+  .user-info {
+    flex: 1;
+
+    .user-name {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .user-role {
+      color: #a0a0a0;
+      font-size: 11px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  }
+
+  .online-indicator {
+    width: 8px;
+    height: 8px;
+    background: #4CAF50;
+    border-radius: 50%;
+    border: 2px solid #2a2a2a;
+  }
 `;
 
 const MessagesArea = styled.div`
@@ -96,21 +184,84 @@ const MessagesArea = styled.div`
 const Message = styled.div`
   display: flex;
   margin-bottom: 16px;
-  
-  .message-content {
-    max-width: 70%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background: ${props => props.isOwn ? '#667eea' : '#2a2a2a'};
+  align-items: flex-start;
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: ${props => props.userColor};
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
-    margin-left: ${props => props.isOwn ? 'auto' : '0'};
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 12px;
+    border: 2px solid ${props => props.userColor};
+    flex-shrink: 0;
   }
-  
-  .message-time {
-    font-size: 10px;
-    color: #a0a0a0;
-    margin-top: 4px;
-    text-align: ${props => props.isOwn ? 'right' : 'left'};
+
+  .message-wrapper {
+    flex: 1;
+
+    .message-sender {
+      color: ${props => props.userColor};
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: ${props => props.userColor};
+        border-radius: 50%;
+      }
+    }
+
+    .message-content {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: ${props => props.isOwn ? '#667eea' : '#2a2a2a'};
+      color: white;
+      margin-left: ${props => !props.isOwn ? '0' : 'auto'};
+      position: relative;
+
+      ${props => props.isOwn && `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 1px solid #5a6fd8;
+
+        &:after {
+          content: '';
+          position: absolute;
+          right: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid #667eea;
+          border-top: 8px solid transparent;
+          border-bottom: 8px solid transparent;
+        }
+      `}
+
+      .message-text {
+        word-wrap: break-word;
+        line-height: 1.4;
+      }
+
+      .message-time {
+        font-size: 10px;
+        color: #a0a0a0;
+        margin-top: 4px;
+        text-align: right;
+      }
+    }
   }
 `;
 
@@ -156,7 +307,39 @@ const MessageInput = styled.div`
 
 const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
-  
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  // kullanıcı renklerini oluştur
+  const getUserColor = (username) => {
+    if (!username || username === 'Atölye') return '#667eea';
+    if (username === 'Sistem') return '#4CAF50';
+
+    // İsimden hash oluştur ve renk üret
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+      const char = username.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 32-bit integer'a çevir
+    }
+
+    // Parlak renkler için hue değeri hesapla
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
+  };
+
+  // Online kullanıcıları yükle (mock data - gerçek API eklenebilir)
+  const loadOnlineUsers = () => {
+    return [
+      { id: 1, username: "Atölye", fullName: "Admin Yönetici", role: "Admin", isOnline: true },
+      { id: 2, username: "Garold P Hull", fullName: "Garold Hull", role: "Müşteri", isOnline: true },
+      { id: 3, username: "Milan Cordes", fullName: "Milan Cordes", role: "Müşteri", isOnline: false },
+      { id: 4, username: "Elin Elisabeth", fullName: "Elin Elisabeth", role: "Müşteri", isOnline: true },
+      { id: 5, username: "Client_ahmet_1234", fullName: "Ahmet Yılmaz", role: "Asistan", isOnline: true },
+      { id: 6, username: "Client_mehmet_5678", fullName: "Mehmet Kaya", role: "Tasarıcı", isOnline: true },
+      { id: 7, username: "System Bot", fullName: "Bot", role: "Otomasyon", isOnline: false }
+    ];
+  };
+
   // localStorage'dan mesajları yükle
   const loadMessages = () => {
     try {
@@ -167,15 +350,24 @@ const Chat = () => {
         { id: 3, text: "Merhaba Garold! Siparişiniz kesim aşamasında. Yarın hazır olacak.", sender: "Atölye", time: "14:31", isOwn: true },
         { id: 4, text: "Tiger pendant için gravür yapılacak isim: Milan", sender: "Milan Cordes", time: "13:10", isOwn: false },
         { id: 5, text: "Anlaşıldı Milan, gravür işlemi bugün yapılacak.", sender: "Atölye", time: "13:12", isOwn: true },
-        { id: 6, text: "Dachshund kolye siparişim hakkında bilgi alabilir miyim?", sender: "Elin Elisabeth", time: "12:40", isOwn: false }
+        { id: 6, text: "Dachshund kolye siparişim hakkında bilgi alabilir miyim?", sender: "Elin Elisabeth", time: "12:40", isOwn: false },
+        { id: 7, text: "Sipariş bilgilerini takip etmek çok kolay!", sender: "Client_ahmet_1234", time: "15:20", isOwn: false },
+        { id: 8, text: "Bunu tamamladığım zaman sizi bilgilendiririm!", sender: "Atölye", time: "15:21", isOwn: true },
+        { id: 9, text: "Teşekkürler, güzel bir sistem kurmuşsunuz!", sender: "Client_mehmet_5678", time: "15:25", isOwn: false }
       ];
     } catch (error) {
       console.error('Mesajlar yüklenirken hata:', error);
       return [];
     }
   };
-  
+
   const [messages, setMessages] = useState(loadMessages);
+
+  // Component mount olduğunda online users'ı yükle
+  useEffect(() => {
+    const users = loadOnlineUsers();
+    setOnlineUsers(users);
+  }, []);
 
   // mesajlar değiştiğinde localStorage'a kaydet
   useEffect(() => {
@@ -195,10 +387,19 @@ const Chat = () => {
         time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
         isOwn: true
       };
-      
+
       setMessages(prev => [...prev, newMsg]);
       setNewMessage('');
     }
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "?";
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -207,26 +408,55 @@ const Chat = () => {
         <h1>Mesajlaşma</h1>
         <p>Genel chat kanalı - Tüm kullanıcılar burada mesajlaşır</p>
       </PageHeader>
-      
+
       <ChatArea>
         <ChannelHeader>
-          <h3>💬 Genel Chat Kanalı</h3>
-          <div>🟢 Online</div>
+          <div className="channel-icon">💬</div>
+          <div className="channel-info">
+            <h3>Genel Chat Kanalı</h3>
+            <p>Etiket: #genel</p>
+          </div>
+          <div className="online-count">{onlineUsers.filter(u => u.isOnline).length} Online</div>
         </ChannelHeader>
-        
+
         <ChatMessages>
           <MessagesArea>
-            {messages.map(message => (
-              <Message key={message.id} isOwn={message.isOwn}>
-                <div className="message-content">
-                  {!message.isOwn && <div className="message-sender">{message.sender}</div>}
-                  {message.text}
-                  <div className="message-time">{message.time}</div>
-                </div>
-              </Message>
-            ))}
+            {messages.map(message => {
+              const userColor = getUserColor(message.sender);
+
+              return (
+                <Message
+                  key={message.id}
+                  isOwn={message.isOwn}
+                  userColor={userColor}
+                >
+                  {!message.isOwn && (
+                    <div className="user-avatar">
+                      {getInitials(message.sender)}
+                    </div>
+                  )}
+
+                  <div className="message-wrapper">
+                    {!message.isOwn && (
+                      <div className="message-sender" style={{ color: userColor }}>
+                        {message.sender}
+                      </div>
+                    )}
+
+                    <div className="message-content">
+                      <div className="message-text">
+                        {message.text}
+                      </div>
+                      <div className="message-time">
+                        {message.time}
+                      </div>
+                    </div>
+                  </div>
+                </Message>
+              );
+            })}
           </MessagesArea>
-          
+
           <MessageInput>
             <input
               type="text"
@@ -238,6 +468,32 @@ const Chat = () => {
             <button onClick={handleSendMessage}>Gönder</button>
           </MessageInput>
         </ChatMessages>
+
+        <OnlineUsers>
+          <OnlineUsersHeader>
+            <h3>Çevrimiçi Kullanıcılar</h3>
+            <div className="online-count">{onlineUsers.filter(u => u.isOnline).length} Online</div>
+          </OnlineUsersHeader>
+
+          <UserListArea>
+            {onlineUsers.map(user => {
+              const userColor = getUserColor(user.username);
+
+              return (
+                <OnlineUserItem key={user.id} userColor={userColor}>
+                  <div className="user-avatar" style={{ backgroundColor: userColor, borderColor: userColor }}>
+                    {getInitials(user.fullName)}
+                  </div>
+                  <div className="user-info">
+                    <p className="user-name">{user.fullName}</p>
+                    <p className="user-role">{user.role}</p>
+                  </div>
+                  {user.isOnline && <div className="online-indicator"></div>}
+                </OnlineUserItem>
+              );
+            })}
+          </UserListArea>
+        </OnlineUsers>
       </ChatArea>
     </ChatContainer>
   );
