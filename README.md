@@ -219,8 +219,15 @@ curl -X POST http://localhost:8080/api/auth/register \
 1. **Current Live Server (Başak Uludağ's PC):**
    ```
    🚀 LIVE SERVER URL: http://192.168.0.10:5173
-   📡 DIRECT ACCESS: Yukarıdaki URL'yi browser'a yazıp bağlanın
+   📡 DIRECT ACCESS: Yukarıdaki URL'yi browser'a yalnızca yazın - hiçbir kurulum gerekmez!
+
+   📵 ÖNEMLİ: localhost yazmayın! - IP adresini yazın: 192.168.0.10:5173
    ```
+
+   **Gerçek Bağlantı Örneği:**
+   - Telefonunuzda: `192.168.0.10:5173`
+   - Tabletinizde: `192.168.0.10:5173`
+   - Laptop'ta: `192.168.0.10:5173`
 
    **Veya Kendi Klon'lanmış Kurulumunuz İçin:**
 
