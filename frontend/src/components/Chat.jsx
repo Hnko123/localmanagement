@@ -307,7 +307,7 @@ const MessageInput = styled.div`
 
 const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
-  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]); // Başlangıçta boş
 
   // kullanıcı renklerini oluştur
   const getUserColor = (username) => {
@@ -327,46 +327,32 @@ const Chat = () => {
     return `hsl(${hue}, 70%, 50%)`;
   };
 
-  // Online kullanıcıları yükle (mock data - gerçek API eklenebilir)
+  // Online kullanıcıları yükle - sadece şu an login olan kullanıcı
   const loadOnlineUsers = () => {
     return [
-      { id: 1, username: "Atölye", fullName: "Admin Yönetici", role: "Admin", isOnline: true },
-      { id: 2, username: "Garold P Hull", fullName: "Garold Hull", role: "Müşteri", isOnline: true },
-      { id: 3, username: "Milan Cordes", fullName: "Milan Cordes", role: "Müşteri", isOnline: false },
-      { id: 4, username: "Elin Elisabeth", fullName: "Elin Elisabeth", role: "Müşteri", isOnline: true },
-      { id: 5, username: "Client_ahmet_1234", fullName: "Ahmet Yılmaz", role: "Asistan", isOnline: true },
-      { id: 6, username: "Client_mehmet_5678", fullName: "Mehmet Kaya", role: "Tasarıcı", isOnline: true },
-      { id: 7, username: "System Bot", fullName: "Bot", role: "Otomasyon", isOnline: false }
+      { id: 1, username: "Atölye", fullName: "Admin Yönetici", role: "Admin", isOnline: true }
     ];
   };
 
-  // localStorage'dan mesajları yükle
+  // Chat mesajlarını temiz tut - sadece welcome mesajı
   const loadMessages = () => {
-    try {
-      const savedMessages = localStorage.getItem('chat-messages');
-      return savedMessages ? JSON.parse(savedMessages) : [
-        { id: 1, text: "🎉 Etsy Chat Kanalı Açıldı!", sender: "Sistem", time: "09:00", isSystem: true },
-        { id: 2, text: "Merhaba! Maltese pendant siparişim nasıl gidiyor?", sender: "Garold P Hull", time: "14:30", isOwn: false },
-        { id: 3, text: "Merhaba Garold! Siparişiniz kesim aşamasında. Yarın hazır olacak.", sender: "Atölye", time: "14:31", isOwn: true },
-        { id: 4, text: "Tiger pendant için gravür yapılacak isim: Milan", sender: "Milan Cordes", time: "13:10", isOwn: false },
-        { id: 5, text: "Anlaşıldı Milan, gravür işlemi bugün yapılacak.", sender: "Atölye", time: "13:12", isOwn: true },
-        { id: 6, text: "Dachshund kolye siparişim hakkında bilgi alabilir miyim?", sender: "Elin Elisabeth", time: "12:40", isOwn: false },
-        { id: 7, text: "Sipariş bilgilerini takip etmek çok kolay!", sender: "Client_ahmet_1234", time: "15:20", isOwn: false },
-        { id: 8, text: "Bunu tamamladığım zaman sizi bilgilendiririm!", sender: "Atölye", time: "15:21", isOwn: true },
-        { id: 9, text: "Teşekkürler, güzel bir sistem kurmuşsunuz!", sender: "Client_mehmet_5678", time: "15:25", isOwn: false }
-      ];
-    } catch (error) {
-      console.error('Mesajlar yüklenirken hata:', error);
-      return [];
-    }
+    return [
+      { id: 1, text: "🎉 Hoş Geldiniz! Bu genel chat kanalıdır.", sender: "Sistem", time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }), isSystem: true }
+    ];
   };
 
   const [messages, setMessages] = useState(loadMessages);
 
-  // Component mount olduğunda online users'ı yükle
+  // Component mount olduğunda
   useEffect(() => {
-    const users = loadOnlineUsers();
-    setOnlineUsers(users);
+    // Online users'ı yükle
+    setOnlineUsers(loadOnlineUsers());
+
+    // Chat mesajlarını temizle (sadece welcome mesajı)
+    setMessages(loadMessages());
+
+    // localStorage temizliğini sağla
+    localStorage.removeItem('chat-messages');
   }, []);
 
   // mesajlar değiştiğinde localStorage'a kaydet
@@ -410,15 +396,6 @@ const Chat = () => {
       </PageHeader>
 
       <ChatArea>
-        <ChannelHeader>
-          <div className="channel-icon">💬</div>
-          <div className="channel-info">
-            <h3>Genel Chat Kanalı</h3>
-            <p>Etiket: #genel</p>
-          </div>
-          <div className="online-count">{onlineUsers.filter(u => u.isOnline).length} Online</div>
-        </ChannelHeader>
-
         <ChatMessages>
           <MessagesArea>
             {messages.map(message => {
