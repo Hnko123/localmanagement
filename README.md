@@ -220,6 +220,27 @@ curl -X POST http://localhost:8080/api/auth/register \
 - 👥 Safe for multi-user team use
 - 🔐 JWT authentication protects data
 
+#### 🚀 Hosting - Sunucu Başlatma (Admin İçin)
+
+Hosting yapmak için tamamen otomatize edilmiş launcher kullanın:
+
+**1 Adım: LAUNCH_HOST.bat Dosyasını Çalıştırın**
+```
+.\LAUNCH_HOST.bat
+```
+Bu dosya otomatik olarak:
+- ✅ Firewall kuralları ayarlar
+- ✅ Ağ erişimi sağlar
+- ✅ Sunucuları başlatır (Python + Node.js)
+- ✅ IP adresinizi tespit eder
+- ✅ Bağlantı bilgilerini gösterir
+
+**Hosting'i Durdurmak İçin:**
+```
+.\STOP_HOST.bat
+```
+Bu dosya sisteminizi tamamen temiz bir şekilde durdurur.
+
 #### 🖥️ Client Setup (Team Members)
 
 **Automatic One-Click Client Setup:**
