@@ -244,46 +244,27 @@ function Configure-Firewall {
 }
 
 # =============================================================================
-# USER REGISTRATION
+# REGISTER SCREEN GUIDANCE
 # =============================================================================
 
-function Register-UserAccount {
+function Show-RegisterInstructions {
     param([string]$ServerIP)
 
-    Write-Step "Setting up user account..."
+    Write-Step "Opening registration page..."
 
-    $userData = @{
-        username = "client_" + [Environment]::UserName.ToLower() + "_" + (Get-Random -Minimum 1000 -Maximum 9999)
-        email = [Environment]::UserName.ToLower() + "@local.team"
-        full_name = [Environment]::UserName
-        password = "welcome123"  # Default password, user can change later
-    }
-
-    try {
-        $jsonData = ConvertTo-Json $userData -Compress
-        $url = "http://${ServerIP}:${BACKEND_PORT}/api/auth/register"
-        $response = Invoke-WebRequest -Uri $url -Method POST -Body $jsonData -ContentType "application/json" -TimeoutSec 10
-
-        if ($response.StatusCode -eq 200) {
-            $result = ConvertFrom-Json $response.Content
-            Write-Step "✅ User account created successfully!"
-            Write-Step "Username: $($result.username)"
-            Write-Step "Password: $($userData.password)"
-            Write-Step "Email: $($result.email)"
-
-            return @{
-                Success = $true
-                Username = $result.username
-                Password = $userData.password
-                UserID = $result.id
-            }
-        }
-    } catch {
-        Write-Error "Failed to create user account: $($_.Exception.Message)"
-        return @{ Success = $false }
-    }
-
-    return @{ Success = $false }
+    Write-Host ""
+    Write-Host "🎯 KENDİ HESABINIZI OLUŞTURABİLİRSİNIZ!" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "📋 Adımlar:" -ForegroundColor Yellow
+    Write-Host "  1. Browser açıldığında 'Register' butonuna tıklayın" -ForegroundColor White
+    Write-Host "  2. Kendinize bir kullanıcı adı seçin" -ForegroundColor White
+    Write-Host "  3. E-posta adresinizi yazın (opsiyonel)" -ForegroundColor White
+    Write-Host "  4. Güçlü bir şifre belirleyin" -ForegroundColor White
+    Write-Host "  5. Adınızı sağdan/Soyadınızı yazın" -ForegroundColor White
+    Write-Host "  6. Register butonuna tıklayın" -ForegroundColor White
+    Write-Host ""
+    Write-Host "✅ Hesabınız oluşturulduktan sonra login yapabilirsiniz!" -ForegroundColor Green
+    Write-Host ""
 }
 
 # =============================================================================
@@ -408,12 +389,12 @@ function Start-ClientSetup {
     Write-Header "ETSY ORDER MANAGEMENT - CLIENT SETUP v$SETUP_VERSION"
 
     Write-Host ""
-    Write-Host "This script will:" -ForegroundColor Cyan
-    Write-Host "  • Detect the server IP automatically"
-    Write-Host "  • Test network connections"
-    Write-Host "  • Create a user account for you"
-    Write-Host "  • Configure firewall rules"
-    Write-Host "  • Launch the browser with your login"
+    Write-Host "Bu script şunları yapacak:" -ForegroundColor Cyan
+    Write-Host "  • Sunucu IP'sini otomatik tespit edecek"
+    Write-Host "  • Ağ bağlantılarını test edecek"
+    Write-Host "  • Firewall kurallarını ayarlayacak"
+    Write-Host "  • Browser'ı login sayfasına yönlendirecek"
+    Write-Host "  • Kendi hesabınızı kendiniz oluşturabileceksiniz!"
     Write-Host ""
 
     # Initial checks
@@ -453,41 +434,26 @@ function Start-ClientSetup {
         exit 1
     }
 
-    # Create user account
-    $userResult = Register-UserAccount -ServerIP $serverIP
-
-    if (-not $userResult.Success) {
-        Write-Error "Could not create user account. Server may be busy or configuration issue."
-        Write-Host "Please contact administrator for manual account setup."
-    } else {
-        Write-Host ""
-        Write-Host "🎉 Setup Complete!" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "Your Account:" -ForegroundColor Yellow
-        Write-Host "  • Username: $($userResult.Username)" -ForegroundColor White
-        Write-Host "  • Password: $($userResult.Password)" -ForegroundColor White
-        Write-Host ""
-        Write-Host "Access URLs:" -ForegroundColor Yellow
-        Write-Host "  • Application: http://${serverIP}:${FRONTEND_PORT}" -ForegroundColor Cyan
-        Write-Host "  • API Status: http://${serverIP}:${BACKEND_PORT}/docs" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "Login Instructions:" -ForegroundColor Yellow
-        Write-Host "  1. Use the username and password above to login" -ForegroundColor White
-        Write-Host "  2. Change your password after first login" -ForegroundColor White
-        Write-Host "  3. You can view and edit orders, tasks, and calendar" -ForegroundColor White
-        Write-Host "  4. Administrator features are restricted" -ForegroundColor White
-        Write-Host ""
-
-        # Save configuration
-        $configFile = Create-ConfigFile -ServerIP $serverIP -UserInfo $userResult
-
-        # Open browser
-        Open-Browser -ServerIP $serverIP
-    }
+    # Show registration instructions
+    Show-RegisterInstructions -ServerIP $serverIP
 
     Write-Host ""
-    Write-Host "Setup completed successfully! 🎉" -ForegroundColor Green
-    Write-Host "Config saved to: $configFile" -ForegroundColor Gray
+    Write-Host "🎉 Kurulum Tamamlandı!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "📋 Özet:" -ForegroundColor Yellow
+    Write-Host "  • Sunucu: http://${serverIP}:${FRONTEND_PORT}" -ForegroundColor White
+    Write-Host "  • IP Adresi: $serverIP" -ForegroundColor White
+    Write-Host "  • Durum: Bağlantı Test Edildi ✅" -ForegroundColor White
+    Write-Host ""
+
+    # Open browser to login page
+    Open-Browser -ServerIP $serverIP
+
+    Write-Host ""
+    Write-Host "🔐 İlk Giriş Sonrası:" -ForegroundColor Yellow
+    Write-Host "  • Şifrenizi değiştirmeyi unutmayın"
+    Write-Host "  • Takım arkadaşları arasında 'Register' butonunu kullanarak katılabilirler"
+
 }
 
 # =============================================================================

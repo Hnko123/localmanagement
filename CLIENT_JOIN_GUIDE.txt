@@ -21,11 +21,13 @@ sisteme katılabilirsiniz. Sadece bir web browser yeterli!
    - Sokdan URL'yi yazın: http://192.168.0.10:5178
    - Enter'a basın
 
-3️⃣ GİRİŞ BİLGİLER FİSTONI İSTEYİN:
-   - Admin'den şunlarımı isteyin:
-     👤 Kullanıcı Adı: (size özel verilecek)
-     🔑 Şifre: (iyice İyi bir şifre seçin değil)
-   - "Ben bağlanmak istiyorum" deyin
+3️⃣ KENDİ HESABINIZI YARATIN:
+   - Browser açıldığında 'REGISTER' butonuna tıklayın
+   - Kendi kullanıcı adınızı seçin
+   - E-posta adresinizi yazın (varsa)
+   - Güçlü bir şifre belirleyin
+   - Adınızı ve Soyadınızı yazın
+   - Register butonuna tıklayın!
 
 4️⃣ GİRİŞ YAPIN VE KULLANIN:
    - Username ve password'u girin

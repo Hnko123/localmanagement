@@ -260,10 +260,12 @@ Eğer arkadaşınızın bilgisayarında GitHub/Git kurulu değilse veya hiç tek
    - Adres çubuğuna yazın: `http://192.168.0.10:5178`
    - Enter'a basın
 
-3️⃣ **Hesap İsteyin:**
-   - Size "Bir hesap lazım" deyin
-   - Size kullanıcı adı ve şifre vereceğim
-   - Login olun ve başlayın!
+3️⃣ **Kendi Hesabınızı Yaratın:**
+   - Browser açıldığında 'REGISTER' butonuna tıklayın
+   - Kendi kullanıcı adınızı seçin
+   - E-posta ve şifre belirleyin
+   - Ad/Soyad bilgilerini doldurun
+   - Register butonuna tıklayın!
 
 #### 📱 Desteklenen Cihazlar:
 - ✅ **Akıllı Telefonlar** (iPhone/Android)
