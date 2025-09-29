@@ -216,33 +216,41 @@ curl -X POST http://localhost:8080/api/auth/register \
 
 **For sharing with friends on local WiFi:**
 
-1. **Get your network IP:**
+1. **Current Live Server (Başak Uludağ's PC):**
+   ```
+   🚀 LIVE SERVER URL: http://192.168.0.10:5173
+   📡 DIRECT ACCESS: Yukarıdaki URL'yi browser'a yazıp bağlanın
+   ```
+
+   **Veya Kendi Klon'lanmış Kurulumunuz İçin:**
+
+2. **Get your network IP:**
    ```bash
    ipconfig | findstr IPv4  # Windows
    ifconfig | grep inet     # Linux/Mac
    # Example: 192.168.0.10
    ```
 
-2. **Start Network Mode:**
+3. **Start Network Mode:**
    ```bash
    start_network.bat  # Opens firewall and starts servers on 0.0.0.0
    ```
 
-3. **Access URLs:**
+4. **Access URLs:**
    ```
-   Frontend: http://192.168.0.10:5178
-   Backend:  http://192.168.0.10:8080
+   Frontend: http://YOUR_IP:5173
+   Backend:  http://YOUR_IP:8000
    ```
 
-4. **Device Access:**
-   - **Phones:** `192.168.0.10:5178`
-   - **Tablets:** `192.168.0.10:5178`
-   - **Computers:** `192.168.0.10:5178`
+5. **Device Access:**
+   - **Phones:** `http://192.168.0.10:5173`
+   - **Tablets:** `http://192.168.0.10:5173`
+   - **Computers:** `http://192.168.0.10:5173`
 
 **Requirements:**
-- ✅ Same WiFi network
+- ✅ Same WiFi network (192.168.0.1 Ağ)
 - ✅ Windows Firewall permissions
-- ✅ Ports 5178, 8080 open
+- ✅ Ports 5173, 8000 open
 - ✅ No VPN active
 
 **Security Notes:**
