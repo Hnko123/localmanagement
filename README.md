@@ -172,6 +172,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 
 ### Access Points
 
+#### Local Development
 | Service | URL | Description |
 |---------|-----|-------------|
 | Frontend | http://localhost:5178 | React Dashboard |
@@ -179,6 +180,45 @@ curl -X POST http://localhost:8080/api/auth/register \
 | Order Sync | `/api/orders/sync` | Manual sheet sync |
 | Image Cache | `/images/filename.jpg` | Cached images |
 | API Docs | `/docs` | FastAPI auto-docs |
+
+#### 🌐 Multi-User Network Access
+
+**For sharing with friends on local WiFi:**
+
+1. **Get your network IP:**
+   ```bash
+   ipconfig | findstr IPv4  # Windows
+   ifconfig | grep inet     # Linux/Mac
+   # Example: 192.168.0.10
+   ```
+
+2. **Start Network Mode:**
+   ```bash
+   start_network.bat  # Opens firewall and starts servers on 0.0.0.0
+   ```
+
+3. **Access URLs:**
+   ```
+   Frontend: http://192.168.0.10:5178
+   Backend:  http://192.168.0.10:8080
+   ```
+
+4. **Device Access:**
+   - **Phones:** `192.168.0.10:5178`
+   - **Tablets:** `192.168.0.10:5178`
+   - **Computers:** `192.168.0.10:5178`
+
+**Requirements:**
+- ✅ Same WiFi network
+- ✅ Windows Firewall permissions
+- ✅ Ports 5178, 8080 open
+- ✅ No VPN active
+
+**Security Notes:**
+- 🔒 Only accessible on local network
+- 🛡️ External internet cannot access
+- 👥 Safe for multi-user team use
+- 🔐 JWT authentication protects data
 
 ## 📡 API Documentation
 
