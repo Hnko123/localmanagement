@@ -521,13 +521,81 @@ def update_cache():
         save_cache()
         print(f"[DEBUG] Cache updated with {len(orders_cache)} records")
 
+def sync_latest_orders():
+    """Sync latest 20 orders from Google Sheets - check every 30 minutes"""
+    global orders_cache
+
+    print("[AUTO-SYNC] Checking for latest 20 orders...")
+    new_orders = fetch_orders_from_sheet()
+
+    if new_orders is not None:
+        # Sort orders by date (latest first)
+        def get_order_date(order):
+            if 'tarih' in order and order['tarih']:
+                try:
+                    # Try different date formats
+                    date_str = str(order['tarih']).strip()
+                    # Handle various date formats
+                    if '/' in date_str:
+                        return datetime.strptime(date_str, '%m/%d/%Y')
+                    elif '.' in date_str:
+                        return datetime.strptime(date_str, '%d.%m.%Y')
+                    else:
+                        return datetime.now()  # Fallback
+                except:
+                    return datetime.min  # Old date
+            return datetime.min
+
+        # Sort by date, latest first
+        sorted_orders = sorted(new_orders, key=get_order_date, reverse=True)
+
+        # Get latest 20 orders
+        latest_20 = sorted_orders[:20]
+
+        print(f"[AUTO-SYNC] Checking latest {len(latest_20)} orders...")
+
+        # Check which are new
+        existing_transactions = {order.get('transaction') for order in orders_cache if order.get('transaction')}
+        new_count = 0
+
+        # Add new orders to cache
+        for order in latest_20:
+            transaction = order.get('transaction')
+            if transaction and transaction not in existing_transactions:
+                orders_cache.append(order)
+                new_count += 1
+
+        if new_count > 0:
+            print(f"[AUTO-SYNC] ✅ {new_count} new orders added!")
+
+            # Download images for new orders
+            download_order_images()
+
+            # Save updated cache
+            save_cache()
+        else:
+            print("[AUTO-SYNC] ℹ️ No new orders to add")
+
 def schedule_updates():
     def repeat():
-        update_cache()
-        timer = threading.Timer(3600, repeat)  # 1 hour
+        update_cache()  # Full update hourly
+        timer = threading.Timer(3600, repeat)  # Keep full update every hour
         timer.daemon = True
         timer.start()
     repeat()
+
+def schedule_quick_sync():
+    """Schedule quick sync every 30 minutes for latest orders"""
+    def repeat():
+        try:
+            sync_latest_orders()
+        except Exception as e:
+            print(f"[AUTO-SYNC ERROR] {str(e)}")
+        timer = threading.Timer(1800, repeat)  # 30 minutes
+        timer.daemon = True
+        timer.start()
+    # Start after 5 minutes
+    threading.Timer(300, repeat).start()
 
 # Assignments management
 assignments = {}
@@ -613,6 +681,9 @@ load_cache()
 if not orders_cache:
     update_cache()  # Initial load
 schedule_updates()
+
+# Start quick sync scheduler for latest orders
+schedule_quick_sync()
 
 @app.get("/api/users", response_model=List[UserResponse])
 def get_users(db: Session = Depends(get_db)):
