@@ -332,18 +332,18 @@ const [users, setUsers] = useState([]);
   const getImageSrc = (photoUrl) => {
     if (!photoUrl) return null;
 
-    // If already cached image (/images/*.jpg format) - use backend URL
+    // If already cached image (/images/*.jpg format) - use backend URL with relative
     if (photoUrl.startsWith('/images/')) {
-      return `http://localhost:8080${photoUrl}`;  // BACKEND SERVED IMAGE
+      return photoUrl;  // Will use vite proxy as /images/*
     }
 
-    // If Google Drive URL - use proxy to cache/download
+    // If Google Drive URL - use directly
     if (photoUrl.includes('drive.google.com')) {
-      return `http://localhost:8080/api/proxy-image?url=${encodeURIComponent(photoUrl)}`;
+      return photoUrl;
     }
 
-    // For other URLs, try proxy as well
-    return `http://localhost:8080/api/proxy-image?url=${encodeURIComponent(photoUrl)}`;
+    // For other URLs, try directly
+    return photoUrl;
   };
 
   const handleColumnResizeStart = useCallback((column) => (e) => {
