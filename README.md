@@ -1,171 +1,549 @@
-# Portable Etsy Manager - ENHANCED EDITION
+# 🚀 Etsy Order Management System
 
-> **A lightweight, self‑contained application that runs the Etsy Manager API and (optionally) a React/Vite UI on any Windows 10 Pro machine without requiring additional installations.**
+**Full-Stack Enterprise E-Commerce Management Platform**
 
-## 🆕 Latest Updates (August 2025)
+> Complete order tracking, user management, task coordination, and image handling system built with modern web technologies.
 
-### ✅ Recently Completed Features
-- **📧 Gmail Integration**: Automatic Etsy order extraction from Gmail
-- **📊 Enhanced Orders Table**: 18-column detailed order view with full customer data
-- **💬 Single Channel Chat**: Unified chat system for all users
-- **📅 Calendar Notes**: Click-to-add notes on calendar days
-- **💾 Data Persistence**: All changes saved with localStorage
-- **🎨 Modern UI**: Complete React 18 + Styled Components interface
+## 📋 Table of Contents
+- [Features](#features)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [API Documentation](#api-documentation)
+- [Database Schema](#database-schema)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-### 🔧 Technical Achievements
-- **Frontend**: React 18.2.0, Vite 5.4.19, Styled Components 6.0.0
-- **Backend**: FastAPI serving 47 Gmail orders via REST API
-- **Data Flow**: Complete Gmail → Backend → Frontend → UI pipeline
-- **Persistence**: localStorage implementation across all components
-- **Architecture**: Single-page application with component-based navigation
+## ✨ Features
 
-### 📈 Current Status
-- ✅ All major features implemented and tested
-- ✅ Frontend running on http://localhost:5175
-- ✅ Backend API operational on http://localhost:8000
-- ✅ Gmail data successfully imported and displayed
-- ✅ Ready for production deployment
+### 🎯 Core Functionality
+- **📊 Real-time Google Sheets Integration** - Automatic order data synchronization
+- **🖼️ Smart Image Handling** - Public Google Drive URL to cached images
+- **🔐 User Authentication** - JWT-based login system
+- **📋 Order Management** - Full CRUD operations with status tracking
+- **👥 Task Assignment** - Collaborative task management with notifications
+- **📅 Calendar Events** - Event scheduling with automated reminders
+- **📈 Dashboard Analytics** - Real-time business insights
 
----table Etsy Manager
+### 🎨 Frontend Features
+- **Modern React UI** - Styled-components powered interface
+- **Responsive Design** - Mobile-first approach
+- **Real-time Updates** - WebSocket-ready architecture
+- **Advanced Table Views** - Sortable, searchable, resizable columns
+- **Image Gallery** - Cached photo display from Google Drive
+- **Dark Theme** - Professional dark UI
 
-> **A lightweight, self‑contained application that runs the Etsy Manager API and (optionally) a React/Vite UI on any Windows 10 Pro machine without requiring additional installations.**
+### 🔧 Backend Features
+- **FastAPI Framework** - High-performance async API
+- **SQLAlchemy ORM** - Advanced database operations
+- **Image Caching System** - Automatic download and serve
+- **Google Sheets API** - Direct spreadsheet integration
+- **JWT Authentication** - Secure token-based auth
+- **File Upload Handling** - Image processing pipeline
+- **Background Tasks** - Async operation processing
 
----
+### 📱 User Experience
+- **Admin Panel** - Full system control
+- **Role-based Access** - Multi-user support
+- **Notification System** - Real-time alerts
+- **Export Capabilities** - Data export features
+- **Search & Filter** - Advanced query capabilities
+- **Audit Logs** - Complete activity tracking
 
-## 📦  What’s Inside?
-| Component | Purpose |
-|-----------|---------|
-| `app/` | FastAPI backend – handles all business logic and data access.
-| `frontend/` | React/Vite UI (3‑D Kanban board). Build this only if you want the web interface.
-| `build_portable.ps1` | One‑click PowerShell script that:
-| | 1. Creates a Python virtual environment, installs dependencies.
-| | 2. Builds the FastAPI app into a single executable using PyInstaller.
-| | 3. (Optional) Copies frontend static files to `app/static`.
+## 🏗️ Architecture
 
----
+### System Components
 
-## ⚙️  Prerequisites
-- **Windows 10 Pro** (64‑bit, 10.0.26100+)
-- **Python 3.13+** (or any >= 3.8) – must include the `venv` module.
-- **Node.js LTS** (if you plan to rebuild the frontend).  You can skip this step if you only need the API.
-
----
-
-## 🛠️  Backend Overview
-The backend is a FastAPI application located in the root (`portable_etsy_manager.py`). It exposes REST endpoints for:
-- **Shops** – list, create, update, delete.
-- **Items** – CRUD operations on Etsy listings.
-- **Orders** – fetch and update order status.
-
-Data persistence is handled by a SQLite database (default `data/etsy.db`).  The connection string can be overridden in `config/settings.json` if you prefer PostgreSQL/MySQL, etc.  All database migrations are performed automatically via Alembic on first run.
-
----
-
-## ⚙️  Setup – Backend Only
-1. **Create a virtual environment** (once per machine):
-   ```powershell
-   python -m venv .venv
-   ```
-2. **Activate the environment**:
-   ```powershell
-   .\.venv\Scripts\Activate.ps1
-   ```
-3. **Install Python dependencies**:
-   ```powershell
-   pip install -r requirements.txt
-   ```
-4. **Configure settings** (optional):
-   Edit `config/settings.json` to change database URL, API keys, or logging level.
-5. **Run the application locally**:
-   ```powershell
-   python portable_etsy_manager.py
-   ```
-   The API will be available at `http://localhost:3000/`.  FastAPI’s automatic docs can be accessed via `http://localhost:3000/docs`.
-
----
-
-## 🚀  Quick Start – Only the API (no UI)
-```powershell
-cd C:\Users\Hakan\Desktop\gmail\portable_etsy_manager
-.uild_portable.ps1   # Builds a self‑contained .exe
-.portable_etsy_manager.exe   # Starts the server
 ```
-The executable uses the same `config/settings.json` and will create the SQLite DB if it does not exist.
-
----
-
-## 🛠️  Re‑Build the Frontend (Optional)
-If you want to modify or rebuild the React UI:
-```powershell
-cd .\frontend
-npm install --legacy-peer-deps
-npx vite build
-xcopy /E /I .\dist ..\app\static\
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend       │    │   Database      │
+│   React +       │    │   FastAPI +     │    │   SQLite       │
+│   Vite          │◄──►│   SQLAlchemy    │◄──►│   PostgreSQL    │
+│                 │    │                 │    │   (Optional)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Google        │    │   Image Cache   │    │   External      │
+│   Sheets API    │    │   Filesystem    │    │   Services      │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
-After copying, run `build_portable.ps1` again – it will pick up the new UI.
 
----
+### Data Flow
 
-## 🏗️  Hosting / Production Deployment
-### Docker (recommended for isolation)
-The repository contains a `Dockerfile.backend` and a minimal `docker-compose.yml`.  To deploy:
+```
+Google Sheets → FastAPI Sync → Database Storage → Frontend Display
+↑                   ↓                     ↓              ↓
+Public URLs → Image Download → File Cache → Image Serve → User View
+```
+
+### Key Components
+
+#### Backend Services
+- **Order Sync Service** - Google Sheets → Database
+- **Image Cache Service** - URL → File Download → Serve
+- **User Auth Service** - JWT Token Management
+- **Notification Service** - In-app Notifications
+- **Task Management** - Assignment & Tracking
+
+#### Database Models
+- **Users** - Authentication & Profile data
+- **Tasks** - Work assignments with status tracking
+- **CalendarEvents** - Scheduled activities
+- **Notifications** - User alerts and updates
+- **Orders** (Cached) - Google Sheets data with images
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Python 3.8+** with `pip`
+- **Node.js 16+** with `npm`
+- **Git** for version control
+
+### Installation
+
+#### 1. Clone Repository
 ```bash
-# Build image
-docker build -t portable-etsy-manager .
-
-# Run container
-docker run -d --name etsy_mgr \
-  -p 3000:3000 \
-  -v C:\Users\Hakan\Desktop\gmail\portable_etsy_manager\data:/app/data \
-  portable-etsy-manager
+git clone https://github.com/yourusername/etsy-order-management.git
+cd etsy-order-management
 ```
-The volume mount keeps the SQLite DB persistent across container restarts.
 
-### Windows Service (for on‑boot persistence)
-Create a service that runs the executable:
-```powershell
-sc create EtsyMgr binPath= "C:\Users\Hakan\Desktop\gmail\portable_etsy_manager\portable_etsy_manager.exe" start= auto
-sc description EtsyMgr "Portable Etsy Manager API"
-```
-Then start it: `sc start EtsyMgr`.
-
-### Cloud Options
-You can also push the Docker image to a container registry (Azure Container Registry, AWS ECR, GCP Artifact Registry) and run it on any cloud VM or managed Kubernetes cluster.  The only requirement is that port **3000** be exposed and the `data` volume persisted via a cloud storage bucket or persistent disk.
-
----
-
-## 🔍  Testing Endpoints
+#### 2. Backend Setup
 ```bash
-# List shops
-curl http://localhost:3000/api/shops
+# Install Python dependencies
+pip install -r requirements.txt
 
-# Create an item (JSON payload)
-curl -X POST http://localhost:3000/api/items \
-     -H "Content-Type: application/json" \
-     -d '{"title":"Sample Item","price":9.99}'
+# Initialize database
+python -c "from api import Base, engine; Base.metadata.create_all(bind=engine)"
+
+# Configure Google Sheets credentials
+# Copy your credentials to config/gmail_credentials.txt
+# Format: Google Client ID: [ID], Google Client Secret: [SECRET]
 ```
-Use Postman or any REST client to explore all routes via the interactive docs at `/docs`.
 
----
+#### 3. Frontend Setup
+```bash
+cd frontend
 
-## 📄  Configuration File (`config/settings.json`)
-```json
-{
-  "database_url": "sqlite:///data/etsy.db",
-  "log_level": "INFO"
-}
+# Install Node.js dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
-- `database_url`: SQLAlchemy connection string.  Change to PostgreSQL, MySQL, etc.
-- `log_level`: Logging verbosity (`DEBUG`, `INFO`, `WARNING`).
+Frontend will run on: `http://localhost:5178`
+
+#### 4. Backend Setup
+```bash
+# Terminal 2 - Start Backend
+python start_web.py
+```
+Backend will run on: `http://localhost:8080`
+
+#### 5. Full System Launch
+```bash
+# Windows Batch (Alternative)
+start_full_8080.bat
+```
+
+### Initial Configuration
+
+#### Google Sheets Setup
+1. Share your Google Sheet publicly (Anyone with link can view)
+2. Note the sheet URL pattern: `https://docs.google.com/spreadsheets/d/...`
+3. Make sure sheet columns include: `photo`, `buyername`, `transaction`, etc.
+
+#### Admin User Creation
+```bash
+# Register first admin user
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@company.com",
+    "full_name": "System Administrator",
+    "password": "securepassword123"
+  }'
+```
+
+### Access Points
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Frontend | http://localhost:5178 | React Dashboard |
+| Backend API | http://localhost:8080 | REST API Endpoints |
+| Order Sync | `/api/orders/sync` | Manual sheet sync |
+| Image Cache | `/images/filename.jpg` | Cached images |
+| API Docs | `/docs` | FastAPI auto-docs |
+
+## 📡 API Documentation
+
+### Core Endpoints
+
+#### Authentication
+```bash
+POST /api/auth/register        # User registration
+POST /api/auth/login           # JWT authentication
+GET  /api/auth/me             # Current user info
+```
+
+#### Order Management
+```bash
+GET  /api/orders              # List all orders
+POST /api/orders/sync         # Sync from Google Sheets
+PUT  /api/orders/{id}/edit    # Edit order fields
+```
+
+#### Task Management
+```bash
+GET  /api/tasks               # List tasks
+POST /api/tasks               # Create task
+PUT  /api/tasks/{id}          # Update task status
+```
+
+#### Calendar & Events
+```bash
+GET  /api/calendar/events     # List all events
+POST /api/calendar/events     # Create new event
+```
+
+#### Notifications
+```bash
+GET  /api/notifications       # User notifications
+PUT  /api/notifications/{id}/read  # Mark as read
+```
+
+#### Dashboard
+```bash
+GET  /api/dashboard/summary   # Dashboard statistics
+```
+
+### Authentication Headers
+```bash
+Authorization: Bearer <jwt_token>
+```
+
+## 🗃️ Database Schema
+
+### Core Tables
+
+#### Users Table
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username VARCHAR UNIQUE,
+    email VARCHAR UNIQUE,
+    full_name VARCHAR,
+    hashed_password VARCHAR,
+    is_active BOOLEAN DEFAULT 1,
+    role VARCHAR DEFAULT 'user',
+    avatar VARCHAR,
+    skills VARCHAR,
+    phone VARCHAR,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Tasks Table
+```sql
+CREATE TABLE tasks (
+    id INTEGER PRIMARY KEY,
+    title VARCHAR,
+    description TEXT,
+    status VARCHAR DEFAULT 'todo',
+    assigned_to INTEGER,
+    priority VARCHAR DEFAULT 'medium',
+    start_date DATETIME,
+    deadline DATETIME,
+    attachment TEXT,
+    created_by INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+#### Calendar Events Table
+```sql
+CREATE TABLE calendar_events (
+    id INTEGER PRIMARY KEY,
+    title VARCHAR,
+    description TEXT,
+    event_date DATETIME,
+    assigned_to INTEGER,
+    type VARCHAR DEFAULT 'event',
+    priority VARCHAR DEFAULT 'medium',
+    recurrence VARCHAR,
+    reminder INTEGER,
+    color VARCHAR DEFAULT '#667eea',
+    created_by INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+#### Notifications Table
+```sql
+CREATE TABLE notifications (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    title VARCHAR,
+    message TEXT,
+    type VARCHAR,
+    related_id INTEGER,
+    data TEXT,
+    is_read BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Migration Scripts
+
+Database migrations are handled automatically via SQLAlchemy. The system uses SQLite for simplicity but can be upgraded to PostgreSQL for production.
+
+## 🔧 Development
+
+### Project Structure
+```
+etsy-order-management/
+├── api.py                    # Main FastAPI application
+├── frontend/                 # React frontend
+│   ├── src/
+│   │   ├── App.jsx          # Main app component
+│   │   ├── components/      # UI components
+│   │   └── assets/          # Static assets
+│   └── public/              # Public files
+├── static/                  # Backend static files
+│   └── image_cache/         # Cached images
+├── data/                    # Data files and cache
+├── config/                  # Configuration files
+├── requirements.txt         # Python dependencies
+└── package.json            # Node.js dependencies
+```
+
+### Development Workflow
+
+#### Backend Development
+```bash
+# Install dev dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest
+
+# Run with auto-reload
+python -m uvicorn api:app --reload --host 0.0.0.0 --port 8080
+```
+
+#### Frontend Development
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start dev server with HMR
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Testing
+
+#### Backend Tests
+```bash
+# Unit tests
+pytest tests/ -v
+
+# Integration tests
+pytest tests/integration/ -v
+
+# Run with coverage
+pytest --cov=api --cov-report=html
+```
+
+#### Frontend Tests
+```bash
+cd frontend
+
+# Unit tests
+npm test
+
+# E2E tests (if configured)
+npm run test:e2e
+```
+
+## 🚀 Deployment
+
+### Production Checklist
+
+- [ ] Update CORS origins for production domain
+- [ ] Configure database connection (switch from SQLite to PostgreSQL)
+- [ ] Set up environment variables for secrets
+- [ ] Configure reverse proxy (nginx/apache)
+- [ ] Set up SSL certificates
+- [ ] Configure domain and DNS
+- [ ] Set up monitoring and logging
+- [ ] Configure backup strategies
+
+### Docker Deployment
+
+#### Build Images
+```bash
+# Build backend image
+docker build -f Dockerfile.backend -t etsy-backend .
+
+# Build frontend image
+cd frontend
+docker build -f Dockerfile -t etsy-frontend .
+```
+
+#### Docker Compose
+```yaml
+version: '3.8'
+services:
+  backend:
+    image: etsy-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/etsy
+    depends_on:
+      - db
+
+  frontend:
+    image: etsy-frontend
+    ports:
+      - "80:80"
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: etsy
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+```
+
+### Cloud Deployment Options
+
+#### Heroku (Easy)
+```bash
+# Backend (FastAPI)
+heroku create etsy-backend
+git push heroku main
+
+# Frontend (Static)
+npm run build
+surge dist/
+```
+
+#### AWS/Google Cloud
+Use standard cloud deployment patterns for FastAPI + React applications.
+
+## 🤝 Contributing
+
+### Development Guidelines
+
+1. **Code Style**
+   - Backend: PEP 8, Black formatter
+   - Frontend: ESLint, Prettier
+   - Commit messages: Conventional commits
+
+2. **Branching Strategy**
+   ```bash
+   # Create feature branch
+   git checkout -b feature/amazing-feature
+
+   # Develop and test
+   # Create pull request
+   ```
+
+3. **Testing Requirements**
+   - All new features must have tests
+   - Minimum 80% code coverage
+   - Integration tests for API endpoints
+
+4. **Documentation**
+   - Update README for new features
+   - Add docstrings to new functions
+   - Update API documentation
+
+### Feature Request Process
+1. Create GitHub issue with feature description
+2. Wait for team approval
+3. Create feature branch and implement
+4. Write tests and documentation
+5. Create pull request
+
+## 📋 Project Status
+
+### Completed Features ✅
+- [x] Google Sheets integration with real-time sync
+- [x] Image caching system from Google Drive URLs
+- [x] Complete user authentication system
+- [x] Task management with user assignment
+- [x] Calendar events with notifications
+- [x] Dashboard analytics and summaries
+- [x] Admin-restricted operations
+- [x] Real-time order status editing
+- [x] Responsive React UI
+- [x] CORS and deployment configurations
+
+### Roadmap 🚧
+- [ ] WebSocket real-time notifications
+- [ ] Advanced reporting and analytics
+- [ ] Mobile app development
+- [ ] Multi-language support
+- [ ] Advanced permission system
+- [ ] API rate limiting and security
+- [ ] Backup and recovery system
+
+## 📞 Support
+
+### Getting Help
+- **Issues**: GitHub Issues
+- **Discussions**: GitHub Discussions
+- **Documentation**: Project Wiki
+- **Contact**: dev@example.com
+
+### Common Issues
+
+#### Google Sheets Not Syncing
+- Ensure sheet is publicly shared
+- Check sheet URL format
+- Verify column headers match expected format
+
+#### Images Not Loading
+- Check if Google Drive files are public
+- Verify cache directory permissions
+- Check network connectivity
+
+#### Authentication Issues
+- Clear browser cache and cookies
+- Verify JWT token expiration
+- Check user credentials
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **FastAPI** - The modern Python web framework
+- **React** - Component-based UI library
+- **SQLAlchemy** - Python SQL toolkit
+- **Styled Components** - CSS-in-JS styling solution
+- **Google APIs** - Cloud services integration
 
 ---
 
-## 🔒  Security & Permissions
-- The application only writes to the project directory and its sub‑folders; it never modifies system folders or registry keys.
-- API authentication is not included out of the box.  If you expose the endpoint publicly, consider adding OAuth/JWT middleware or reverse‑proxy basic auth.
-- Keep `settings.json` secret – especially if you use external databases or API keys.
+**Built with ❤️ by the Etsy Order Management Team**
 
----
-
-## 🎉  Done!
-You now have a fully functional, portable Etsy Manager that can be run locally, packaged as an executable, or deployed via Docker/Windows Service.  Happy coding! 
+*For more information, visit our [project website](https://github.com/yourusername/etsy-order-management) or contact the development team.*

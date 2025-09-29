@@ -3,11 +3,14 @@ import styled from 'styled-components';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import KanbanBoard from './components/KanbanBoard';
-import TableView from './components/TableView_COMPLETE';
+import TableView from './components/TableView';
 import Tasks from './components/Tasks';
 import Calendar from './components/Calendar';
 import Chat from './components/Chat';
 import TestInteraction from './components/TestInteraction';
+import Login from './components/Login';
+import Register from './components/Register';
+import Profile from './components/Profile';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -87,14 +90,30 @@ const OrdersHeader = styled.div`
 function App() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activePage, setActivePage] = useState('dashboard');
+  const [activePage, setActivePage] = useState(() => localStorage.getItem('activePage') || 'dashboard');
   const [ordersViewMode, setOrdersViewMode] = useState('table'); // 'kanban' or 'table'
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  });
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+
     const fetchOrders = async () => {
       try {
-        const response = await fetch('/api/orders');
+          const response = await fetch('http://127.0.0.1:8080/api/orders');
         if (response.ok) {
           const data = await response.json();
           setOrders(data);
@@ -125,8 +144,27 @@ function App() {
     fetchOrders();
   }, []);
 
+  // Save active page to localStorage
+  useEffect(() => {
+    localStorage.setItem('activePage', activePage);
+  }, [activePage]);
+
+  // Save sidebar collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
   const handleSidebarStateChange = (collapsed) => {
     setSidebarCollapsed(collapsed);
+  };
+
+  const handleLoginSuccess = (mode) => {
+    if (mode === 'register') {
+      setAuthMode('register');
+    } else {
+      setIsAuthenticated(true);
+      setAuthMode('login');
+    }
   };
 
   const renderPage = () => {
@@ -178,10 +216,17 @@ function App() {
     );
   }
 
+  if (!isAuthenticated) {
+    if (authMode === 'register') {
+      return <Register onSwitchToLogin={() => setAuthMode('login')} />;
+    }
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <AppContainer>
-      <Sidebar 
-        activePage={activePage} 
+      <Sidebar
+        activePage={activePage}
         onPageChange={setActivePage}
         onStateChange={handleSidebarStateChange}
       />

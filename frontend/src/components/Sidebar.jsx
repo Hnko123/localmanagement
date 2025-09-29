@@ -100,12 +100,12 @@ const Sidebar = ({ activePage, onPageChange, onStateChange }) => {
   const timeoutRef = useRef(null);
 
   const navItems = [
-    { id: 'dashboard', icon: '📊', text: 'Dashboard' },
-    { id: 'orders', icon: '📦', text: 'Orders' },
-    { id: 'tasks', icon: '✅', text: 'Tasks' },
-    { id: 'calendar', icon: '📅', text: 'Calendar' },
-    { id: 'chat', icon: '💬', text: 'Chat' },
-    { id: 'test', icon: '🧪', text: 'Test Interaction' }
+    { id: 'dashboard', icon: '📊', text: 'Ana Sayfa' },
+    { id: 'orders', icon: '📦', text: 'Siparişler' },
+    { id: 'tasks', icon: '✅', text: 'Görevler' },
+    { id: 'calendar', icon: '📅', text: 'Takvim' },
+    { id: 'chat', icon: '💬', text: 'Sohbet' },
+    { id: 'test', icon: '🧪', text: 'Test Etkileşimi' }
   ];
 
   const handleMouseEnter = () => {

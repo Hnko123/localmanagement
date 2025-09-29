@@ -2,442 +2,686 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const CalendarContainer = styled.div`
-  min-height: 100vh;
-  background: #1a1a1a;
-  padding: 0;
-  margin: 0;
+  padding: 20px;
+  color: white;
 `;
 
 const PageHeader = styled.div`
-  background: #2a2a2a;
-  border-bottom: 1px solid #3a3a3a;
-  padding: 20px 30px;
-  
-  h1 {
-    color: white;
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-  }
-  
-  p {
-    color: #a0a0a0;
-    margin: 0;
-    font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+const PageTitle = styled.h1`
+  color: white;
+  margin: 0;
+`;
+
+const AddEventButton = styled.button`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
   }
 `;
 
-const ContentArea = styled.div`
-  padding: 30px;
+const CalendarWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
 `;
 
-const CalendarGrid = styled.div`
+const CalendarView = styled.div`
   background: #2a2a2a;
   border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 30px;
+  padding: 20px;
 `;
 
 const CalendarHeader = styled.div`
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  
-  h2 {
-    color: white;
-    font-size: 20px;
-    font-weight: 600;
-  }
-  
-  .nav-buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  button {
-    background: #3a3a3a;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    
-    &:hover {
-      background: #4a4a4a;
-    }
-  }
 `;
 
-const WeekDays = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  margin-bottom: 1px;
+const MonthSelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
-const WeekDay = styled.div`
-  background: #333;
-  color: #a0a0a0;
-  padding: 12px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-`;
-
-const CalendarDays = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-`;
-
-const CalendarDay = styled.div`
-  background: ${props => props.isToday ? '#667eea' : '#2a2a2a'};
-  color: ${props => props.isOtherMonth ? '#666' : 'white'};
-  padding: 12px 8px;
-  min-height: 80px;
-  border: 1px solid #3a3a3a;
+const NavButton = styled.button`
+  background: #444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  position: relative;
-  
+  font-size: 16px;
+
   &:hover {
-    background: ${props => props.isToday ? '#5a6fd8' : '#333'};
+    background: #555;
   }
-  
-  .day-number {
-    font-weight: 600;
-    margin-bottom: 4px;
+`;
+
+const MonthYear = styled.h2`
+  color: white;
+  margin: 0;
+  font-size: 24px;
+`;
+
+const DaysGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+`;
+
+const DayHeader = styled.div`
+  text-align: center;
+  font-weight: 600;
+  color: #aaa;
+  padding: 10px;
+  font-size: 14px;
+`;
+
+const DayCell = styled.div`
+  background: ${props => props.isCurrentMonth ? '#333' : '#222'};
+  border: 2px solid ${props => props.isToday ? '#667eea' : 'transparent'};
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 120px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #3a3a3a;
   }
-  
-  .day-events {
-    font-size: 10px;
-    color: #a0a0a0;
-  }
-  
-  .note-indicator {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    background: #4CAF50;
-    border-radius: 50%;
-    display: ${props => props.hasNote ? 'block' : 'none'};
-  }
+`;
+
+const DayNumber = styled.div`
+  text-align: right;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: ${props => props.isCurrentDay ? '#667eea' : props.isCurrentMonth ? 'white' : '#666'};
+`;
+
+const EventIndicator = styled.div`
+  background: #f39c12;
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: 2px 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const ReminderIndicator = styled.div`
+  background: #e74c3c;
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: 2px 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const SidebarContent = styled.div`
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  position: sticky;
+  top: 20px;
+`;
+
+const SidebarTitle = styled.h3`
+  color: white;
+  margin: 0 0 15px 0;
+  font-size: 18px;
 `;
 
 const EventsList = styled.div`
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 24px;
+  max-height: 300px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
 `;
 
 const EventItem = styled.div`
   background: #333;
-  border-left: 4px solid ${props => props.color || '#667eea'};
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  border-radius: 0 8px 8px 0;
-  
-  .event-title {
-    color: white;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  
-  .event-time {
-    color: #a0a0a0;
-    font-size: 12px;
-  }
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 14px;
 `;
 
-const Modal = styled.div`
+const EventTitle = styled.div`
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+`;
+
+const EventTime = styled.div`
+  color: #ccc;
+  font-size: 12px;
+  margin-bottom: 4px;
+`;
+
+const EventAssignee = styled.div`
+  background: rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  display: inline-block;
+`;
+
+const EventModal = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
 `;
 
 const ModalContent = styled.div`
   background: #2a2a2a;
+  padding: 30px;
   border-radius: 12px;
-  padding: 24px;
-  width: 400px;
+  width: 500px;
   max-width: 90vw;
-  
-  h3 {
-    color: white;
-    margin-bottom: 16px;
-  }
-  
-  textarea {
-    width: 100%;
-    height: 120px;
-    background: #333;
-    border: 1px solid #555;
-    border-radius: 6px;
-    color: white;
-    padding: 12px;
-    resize: vertical;
-    font-family: inherit;
-    
-    &::placeholder {
-      color: #999;
-    }
-  }
-  
-  .modal-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    justify-content: flex-end;
-    
-    button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      
-      &.save-btn {
-        background: #4CAF50;
-        color: white;
-        
-        &:hover {
-          background: #45a049;
-        }
-      }
-      
-      &.cancel-btn {
-        background: #666;
-        color: white;
-        
-        &:hover {
-          background: #777;
-        }
-      }
-    }
+`;
+
+const ModalTitle = styled.h2`
+  color: white;
+  margin: 0 0 20px 0;
+  font-size: 24px;
+`;
+
+const ModalForm = styled.form``;
+
+const FormGroup = styled.div`
+  margin-bottom: 20px;
+`;
+
+const FormLabel = styled.label`
+  display: block;
+  color: white;
+  margin-bottom: 8px;
+  font-weight: 500;
+`;
+
+const FormInput = styled.input`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
   }
 `;
 
-const Calendar = () => {
+const FormTextarea = styled.textarea`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  font-size: 14px;
+  min-height: 100px;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FormSelect = styled.select`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const TimeInputs = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const TimeInput = styled(FormInput)`
+  flex: 1;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 30px;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+const SaveButton = styled(ModalButton)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+`;
+
+const CancelButton = styled(ModalButton)`
+  background: #666;
+  color: white;
+`;
+
+const ReminderCheckbox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const Checkbox = styled.input`
+  width: 16px;
+  height: 16px;
+`;
+
+const CheckboxLabel = styled.label`
+  color: white;
+  font-size: 14px;
+`;
+
+function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [noteText, setNoteText] = useState('');
-  
-  // localStorage'dan notları yükle
-  const loadNotes = () => {
-    try {
-      const savedNotes = localStorage.getItem('calendar-notes');
-      return savedNotes ? JSON.parse(savedNotes) : {};
-    } catch (error) {
-      console.error('Notlar yüklenirken hata:', error);
-      return {};
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [events, setEvents] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    loadEvents();
+    loadUsers();
+  }, []);
+
+  const loadEvents = () => {
+    const savedEvents = localStorage.getItem('calendar_events');
+    if (savedEvents) {
+      setEvents(JSON.parse(savedEvents));
     }
   };
-  
-  const [dayNotes, setDayNotes] = useState(loadNotes);
 
-  // dayNotes değiştiğinde localStorage'a kaydet
-  useEffect(() => {
+  const saveEvents = (newEvents) => {
+    setEvents(newEvents);
+    localStorage.setItem('calendar_events', JSON.stringify(newEvents));
+  };
+
+  const loadUsers = async () => {
     try {
-      localStorage.setItem('calendar-notes', JSON.stringify(dayNotes));
+      const response = await fetch('http://127.0.0.1:8080/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
     } catch (error) {
-      console.error('Notlar kaydedilirken hata:', error);
+      console.error('Error loading users:', error);
     }
-  }, [dayNotes]);
-  
-  // Handle functions
-  const handlePreviousMonth = () => {
-    console.log('Previous month clicked');
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
-    console.log('Next month clicked');
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  const handleToday = () => {
-    console.log('Today button clicked');
-    setCurrentDate(new Date());
+  const handleDayClick = (day) => {
+    setSelectedDate(day);
+    setShowModal(true);
   };
 
-  const handleDayClick = (dayInfo) => {
-    console.log('Day clicked:', dayInfo);
-    setSelectedDay(dayInfo);
-    const dayKey = `${dayInfo.year}-${dayInfo.month}-${dayInfo.date}`;
-    setNoteText(dayNotes[dayKey] || '');
-    setIsModalOpen(true);
-  };
+  const getMonthDates = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-  const handleSaveNote = () => {
-    if (selectedDay) {
-      const dayKey = `${selectedDay.year}-${selectedDay.month}-${selectedDay.date}`;
-      setDayNotes(prev => ({
-        ...prev,
-        [dayKey]: noteText
-      }));
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startingDayOfWeek = firstDay.getDay();
+
+    const dates = [];
+
+    // Previous month dates
+    const prevMonth = new Date(year, month - 1);
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+      dates.push(new Date(year, month - 1, prevMonthLastDay - i));
     }
-    setIsModalOpen(false);
-    setNoteText('');
-    setSelectedDay(null);
+
+    // Current month dates
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      dates.push(new Date(year, month, i));
+    }
+
+    // Next month dates
+    const remainingCells = 42 - dates.length; // 6 weeks * 7 days
+    for (let i = 1; i <= remainingCells; i++) {
+      dates.push(new Date(year, month + 1, i));
+    }
+
+    return dates;
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setNoteText('');
-    setSelectedDay(null);
+  const getEventsForDay = (day) => {
+    const dayKey = day.toDateString();
+    return events[dayKey] || [];
   };
-  
-  // Basit takvim günleri oluştur
-  const generateCalendarDays = () => {
+
+  const getEventsForSelectedMonth = () => {
+    const monthEvents = [];
+    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    for (let d = monthStart; d <= monthEnd; d.setDate(d.getDate() + 1)) {
+      const dayEvents = getEventsForDay(new Date(d));
+      if (dayEvents.length > 0) {
+        monthEvents.push(...dayEvents);
+      }
+    }
+    return monthEvents;
+  };
+
+  const formatTime = (timeStr) => {
+    return timeStr; // HH:MM format
+  };
+
+  const getAssigneeName = (assigneeId) => {
+    const user = users.find(u => u.id === assigneeId);
+    return user ? user.full_name || user.username : 'Bilinmiyor';
+  };
+
+  const isToday = (day) => {
     const today = new Date();
-    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-    
-    const days = [];
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      
-      const dayInfo = {
-        date: date.getDate(),
-        month: date.getMonth(),
-        year: date.getFullYear(),
-        isToday: date.toDateString() === today.toDateString(),
-        isOtherMonth: date.getMonth() !== currentDate.getMonth(),
-        fullDate: date
-      };
-      
-      const dayKey = `${dayInfo.year}-${dayInfo.month}-${dayInfo.date}`;
-      dayInfo.hasNote = dayNotes[dayKey] && dayNotes[dayKey].length > 0;
-      
-      days.push(dayInfo);
-    }
-    return days;
+    return day.toDateString() === today.toDateString();
   };
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Maltese Pendant - Teslimat",
-      time: "09:00",
-      date: "2025-08-22",
-      color: "#10b981"
-    },
-    {
-      id: 2,
-      title: "Tiger Pendant - Gravür",
-      time: "14:00", 
-      date: "2025-08-22",
-      color: "#f59e0b"
-    },
-    {
-      id: 3,
-      title: "Phoenix Pendant - Kargo",
-      time: "11:00",
-      date: "2025-08-23",
-      color: "#8b5cf6"
-    },
-    {
-      id: 4,
-      title: "Samoyed x3 - Üretim Başla",
-      time: "08:00",
-      date: "2025-08-24",
-      color: "#3b82f6"
-    }
-  ];
-
-  const weekDays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-  const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-                     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const isCurrentMonth = (day) => {
+    return day.getMonth() === currentDate.getMonth();
+  };
 
   return (
     <CalendarContainer>
       <PageHeader>
-        <h1>Takvim</h1>
-        <p>Üretim programı ve teslimat takvibi</p>
+        <PageTitle>Takvim & Hatırlatımlar</PageTitle>
+        <AddEventButton onClick={() => setShowModal(true)}>
+          ➕ Etkinlik Ekle
+        </AddEventButton>
       </PageHeader>
-      <ContentArea>
-        <CalendarGrid>
+
+      <CalendarWrapper>
+        <CalendarView>
           <CalendarHeader>
-            <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
-            <div className="nav-buttons">
-              <button onClick={handlePreviousMonth}>← Önceki</button>
-              <button onClick={handleToday}>Bugün</button>
-              <button onClick={handleNextMonth}>Sonraki →</button>
-            </div>
+            <MonthSelector>
+              <NavButton onClick={handlePrevMonth}>◀</NavButton>
+              <MonthYear>
+                {currentDate.toLocaleDateString('tr-TR', {
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </MonthYear>
+              <NavButton onClick={handleNextMonth}>▶</NavButton>
+            </MonthSelector>
           </CalendarHeader>
-          
-          <WeekDays>
-            {weekDays.map(day => (
-              <WeekDay key={day}>{day}</WeekDay>
+
+          <DaysGrid>
+            {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(day => (
+              <DayHeader key={day}>{day}</DayHeader>
             ))}
-          </WeekDays>
-          
-          <CalendarDays>
-            {generateCalendarDays().map((day, index) => (
-              <CalendarDay 
-                key={index}
-                isToday={day.isToday}
-                isOtherMonth={day.isOtherMonth}
-                hasNote={day.hasNote}
-                onClick={() => handleDayClick(day)}
-              >
-                <div className="day-number">{day.date}</div>
-                <div className="day-events">
-                  {day.isToday && <div>📅 Bugün</div>}
-                </div>
-                <div className="note-indicator"></div>
-              </CalendarDay>
+
+            {getMonthDates().map((day, index) => {
+              const dayEvents = getEventsForDay(day);
+              const isTodayDate = isToday(day);
+              const isCurrentMonthDay = isCurrentMonth(day);
+
+              return (
+                <DayCell
+                  key={index}
+                  isCurrentMonth={isCurrentMonthDay}
+                  isToday={isTodayDate}
+                  onClick={() => handleDayClick(day)}
+                >
+                  <DayNumber
+                    isCurrentDay={isTodayDate}
+                    isCurrentMonth={isCurrentMonthDay}
+                  >
+                    {day.getDate()}
+                  </DayNumber>
+
+                  {dayEvents.map((event, eventIndex) => (
+                    <div key={eventIndex}>
+                      {event.reminder ? (
+                        <ReminderIndicator>
+                          🔔 {event.time} - {event.title}
+                        </ReminderIndicator>
+                      ) : (
+                        <EventIndicator>
+                          📅 {event.time} - {event.title}
+                        </EventIndicator>
+                      )}
+                    </div>
+                  ))}
+                </DayCell>
+              );
+            })}
+          </DaysGrid>
+        </CalendarView>
+
+        <SidebarContent>
+          <SidebarTitle>Aylık Etkinlikler</SidebarTitle>
+          <EventsList>
+            {getEventsForSelectedMonth().map((event, index) => (
+              <EventItem key={index}>
+                <EventTitle>{event.title}</EventTitle>
+                <EventTime>
+                  {new Date(event.date).toLocaleDateString('tr-TR')} {formatTime(event.time)}
+                </EventTime>
+                {event.assigned_to && (
+                  <EventAssignee>👤 {getAssigneeName(parseInt(event.assigned_to))}</EventAssignee>
+                )}
+                {event.description && (
+                  <div style={{ color: '#ccc', fontSize: '13px', marginTop: '4px' }}>
+                    {event.description}
+                  </div>
+                )}
+              </EventItem>
             ))}
-          </CalendarDays>
-        </CalendarGrid>
-        
-        <EventsList>
-          <h3 style={{ color: 'white', marginBottom: '20px' }}>Yaklaşan Etkinlikler</h3>
-          {upcomingEvents.map(event => (
-            <EventItem key={event.id} color={event.color}>
-              <div className="event-title">{event.title}</div>
-              <div className="event-time">📅 {event.date} • 🕐 {event.time}</div>
-            </EventItem>
-          ))}
-        </EventsList>
-      </ContentArea>
-      
-      {isModalOpen && (
-        <Modal onClick={handleCloseModal}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            <h3>Not Ekle - {selectedDay?.date}/{selectedDay?.month + 1}/{selectedDay?.year}</h3>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Notunuzu buraya yazın..."
+          </EventsList>
+        </SidebarContent>
+      </CalendarWrapper>
+
+      {showModal && (
+        <EventModal onClick={() => setShowModal(false)}>
+          <ModalContent onClick={e => e.stopPropagation()}>
+            <ModalTitle>Yeni Etkinlik</ModalTitle>
+            <EventForm
+              selectedDate={selectedDate}
+              users={users}
+              onSave={(eventData) => {
+                const dayKey = selectedDate.toDateString();
+                const currentEvents = { ...events };
+                if (!currentEvents[dayKey]) {
+                  currentEvents[dayKey] = [];
+                }
+                currentEvents[dayKey].push({
+                  id: Date.now().toString(),
+                  date: selectedDate.toISOString(),
+                  ...eventData
+                });
+                saveEvents(currentEvents);
+                setShowModal(false);
+              }}
+              onCancel={() => setShowModal(false)}
             />
-            <div className="modal-buttons">
-              <button className="cancel-btn" onClick={handleCloseModal}>
-                İptal
-              </button>
-              <button className="save-btn" onClick={handleSaveNote}>
-                Kaydet
-              </button>
-            </div>
           </ModalContent>
-        </Modal>
+        </EventModal>
       )}
     </CalendarContainer>
   );
-};
+}
+
+function EventForm({ selectedDate, users, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    time: '10:00',
+    assigned_to: '',
+    reminder: false
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <ModalForm onSubmit={handleSubmit}>
+      <FormGroup>
+        <FormLabel>Başlık</FormLabel>
+        <FormInput
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          placeholder="Etkinlik başlığı..."
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>Açıklama</FormLabel>
+        <FormTextarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Etkinlik detayları..."
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>Saat</FormLabel>
+        <FormInput
+          type="time"
+          name="time"
+          value={formData.time}
+          onChange={handleChange}
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>Tarih</FormLabel>
+        <FormInput
+          type="date"
+          value={selectedDate.toISOString().split('T')[0]}
+          disabled
+        />
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel>Atanacak Kişi</FormLabel>
+        <FormSelect
+          name="assigned_to"
+          value={formData.assigned_to}
+          onChange={handleChange}
+        >
+          <option value="">Seçin...</option>
+          {users.map(user => (
+            <option key={user.id} value={user.id}>
+              {user.full_name || user.username}
+            </option>
+          ))}
+        </FormSelect>
+      </FormGroup>
+
+      <ReminderCheckbox>
+        <Checkbox
+          type="checkbox"
+          name="reminder"
+          checked={formData.reminder}
+          onChange={handleChange}
+          id="reminder"
+        />
+        <CheckboxLabel htmlFor="reminder">
+          ⏰ Hatırlatma etkinleştir
+        </CheckboxLabel>
+      </ReminderCheckbox>
+
+      <ModalActions>
+        <CancelButton type="button" onClick={onCancel}>
+          İptal
+        </CancelButton>
+        <SaveButton type="submit">
+          Kaydet
+        </SaveButton>
+      </ModalActions>
+    </ModalForm>
+  );
+}
 
 export default Calendar;
